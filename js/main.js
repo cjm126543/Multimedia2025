@@ -114,6 +114,7 @@ function init() {
     const geometry = new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, - 1 ) ] );
 
     const line = new THREE.Line( geometry );
+    line.computeLineDistances(); // ← esto es obligatorio
     line.name = 'line';
     line.scale.z = 5;
 
@@ -292,17 +293,32 @@ function capturarInterseccionParaDibujar(controller, intersection) {
             // Mando izquierdo
             isDrawingLeft = true;
             drawingPointsLeft = [point];
-            const geometry = new THREE.BufferGeometry().setFromPoints(drawingPointsLeft);
-            const material = new THREE.LineMaterial({ color: 0x0000ff, linewidth: 2 }); // Azul
-            currentLineLeft = new THREE.Line2(geometry, material);
+            //const geometry = new THREE.BufferGeometry().setFromPoints(drawingPointsLeft);
+            //let material = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 10 }); // Azul
+
+            const dummyPoint = point.clone().add(new THREE.Vector3(0.001, 0, 0));
+            const curve = new THREE.CatmullRomCurve3([point, dummyPoint]);
+            const geometry = new THREE.TubeGeometry(curve, 100, 0.01, 8, false); // radio = grosor
+            const material = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // Azul
+
+
+            //material.resolution.set(window.innerWidth, window.innerHeight);
+            currentLineLeft = new THREE.Mesh(geometry, material);
             scene.add(currentLineLeft);
         } else if (controller === controller2) {
             // Mando derecho
             isDrawingRight = true;
             drawingPointsRight = [point];
-            const geometry = new THREE.BufferGeometry().setFromPoints(drawingPointsRight);
-            const material = new THREE.LineMaterial({ color: 0xff0000, linewidth: 2 }); // Rojo
-            currentLineRight = new THREE.Line2(geometry, material);
+            //const geometry = new THREE.BufferGeometry().setFromPoints(drawingPointsRight);
+            //const material = new THREE.LineBasicMaterial({ color: 0xff0000,linewidth: 10 }); // Rojo
+
+            const dummyPoint = point.clone().add(new THREE.Vector3(0.001, 0, 0));
+            const curve = new THREE.CatmullRomCurve3([point, dummyPoint]);
+            const geometry = new THREE.TubeGeometry(curve, 100, 0.01, 8, false); // radio = grosor
+            const material = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // Azul
+
+
+            currentLineRight = new THREE.Mesh(geometry, material);
             scene.add(currentLineRight);
         }
     }
@@ -311,44 +327,52 @@ function capturarInterseccionParaDibujar(controller, intersection) {
     }
 }
 
-function pintarLinea(){
-
+function pintarLinea() {
     if (isDrawingLeft) {
         const intersections = getIntersections(controller1);
-        if (intersections.length > 0) {
+        if (intersections.length > 0 && intersections[0].object === floor) {
             const point = intersections[0].point.clone();
-    
-            // Verificar distancia mínima
             const lastPoint = drawingPointsLeft[drawingPointsLeft.length - 1];
-            if (!lastPoint || point.distanceTo(lastPoint) > 0.02) { // ← mínimo 2 cm
+
+            if (!lastPoint || point.distanceTo(lastPoint) > 0.01) {
                 drawingPointsLeft.push(point);
-    
-                const curve = new THREE.CatmullRomCurve3(drawingPointsLeft);
-                const smoothPoints = curve.getPoints(100); // 100 puntos suaves
-    
-                currentLineLeft.geometry.setFromPoints(smoothPoints);
+
+                if (drawingPointsLeft.length >= 2) {
+                    const curve = new THREE.CatmullRomCurve3(drawingPointsLeft);
+                    const geometry = new THREE.TubeGeometry(curve, 64, 0.09, 8, false);
+                    const material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+
+                    if (currentLineLeft) scene.remove(currentLineLeft);
+                    currentLineLeft = new THREE.Mesh(geometry, material);
+                    scene.add(currentLineLeft);
+                }
             }
         }
     }
 
     if (isDrawingRight) {
         const intersections = getIntersections(controller2);
-        if (intersections.length > 0) {
+        if (intersections.length > 0 && intersections[0].object === floor) {
             const point = intersections[0].point.clone();
-    
-            // Verificar distancia mínima
             const lastPoint = drawingPointsRight[drawingPointsRight.length - 1];
-            if (!lastPoint || point.distanceTo(lastPoint) > 0.02) { // ← mínimo 2 cm
+
+            if (!lastPoint || point.distanceTo(lastPoint) > 0.01) {
                 drawingPointsRight.push(point);
-    
-                const curve = new THREE.CatmullRomCurve3(drawingPointsRight);
-                const smoothPoints = curve.getPoints(100); // 100 puntos suaves
-    
-                currentLineRight.geometry.setFromPoints(smoothPoints);
+
+                if (drawingPointsRight.length >= 2) {
+                    const curve = new THREE.CatmullRomCurve3(drawingPointsRight);
+                    const geometry = new THREE.TubeGeometry(curve, 64, 0.09, 8, false);
+                    const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+
+                    if (currentLineRight) scene.remove(currentLineRight);
+                    currentLineRight = new THREE.Mesh(geometry, material);
+                    scene.add(currentLineRight);
+                }
             }
         }
     }
 }
+
 
 function finalizarDibujoLinea(controller)
 {
