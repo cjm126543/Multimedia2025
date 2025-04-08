@@ -28,6 +28,11 @@ export function crearObjetos(numObjetos, scene) {
     }
 }
 
+/**
+ * Comienza los contadores de programa para el tiempo de ejecucion y el tiempo en equilibrio.
+ * @param {Object} window: Ventana del navegador ¿este o el controlador debe hacer de evento? 
+ * @returns array[2]: tiempo de inicio del programa y contador a 0 del tiempo en equilibrio 
+ */
 export function empiezaContadores(window) {
     window.addEventListener("onBalance", balanceOn);
     window.addEventListener("offBalance", balanceOff);
@@ -35,6 +40,12 @@ export function empiezaContadores(window) {
     return [Date.now(), balanceTime];
 }
 
+/**
+ * Termina los contadores de programa para el tiempo de ejecucion y el tiempo en equilibrio.
+ * @param {Object} window: Ventana del navegador ¿este o el controlador debe hacer de evento? 
+ * @param {Date} startExecTime: Tiempo de inicio del programa.
+ * @returns array[2]: tiempo total de ejecucion y de equilibrio
+ */
 export function terminaContadores(window, startExecTime) {
     let executionTime = (Date.now - startExecTime) / 1000;
     window.removeEventListener("onBalance", balanceOn);
@@ -42,3 +53,4 @@ export function terminaContadores(window, startExecTime) {
     let balanceTime = getBalanceTime() / 1000;
     return [executionTime, balanceTime];
 }
+
