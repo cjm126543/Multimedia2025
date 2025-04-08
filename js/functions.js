@@ -36,7 +36,7 @@ export function crearObjetos(numObjetos, scene) {
 export function empiezaContadores(window) {
     window.addEventListener("onBalance", balanceOn);
     window.addEventListener("offBalance", balanceOff);
-    let balanceTime = 0.0;
+    setBalanceTime(0.0);
     return [Date.now(), balanceTime];
 }
 
@@ -47,10 +47,30 @@ export function empiezaContadores(window) {
  * @returns array[2]: tiempo total de ejecucion y de equilibrio
  */
 export function terminaContadores(window, startExecTime) {
-    let executionTime = (Date.now - startExecTime) / 1000;
+    let executionTime = (Date.now() - startExecTime) / 1000;
     window.removeEventListener("onBalance", balanceOn);
     window.removeEventListener("offBalance", balanceOff);
     let balanceTime = getBalanceTime() / 1000;
     return [executionTime, balanceTime];
 }
 
+function checkBalance(eventL, eventR) {
+    // Se puede hacer esto???
+    let leftController = eventL.target;
+    let rightController = eventR.target;
+
+    let yMargin = 5; // En cm o relativo a ventana??
+
+    let leftY = leftController.position.y;
+    let rightY = rightController.position.y;
+
+}
+
+function balanceOn() {
+    tempBalanceTime = Date.now();
+}
+
+function balanceOff() {
+    let elapsedBalanceTime = Date.now() - tempBalanceTime;
+    setBalanceTime(getBalanceTime() + elapsedBalanceTime);
+}
