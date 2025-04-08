@@ -4,6 +4,9 @@ import { VRButton } from 'three/addons/webxr/VRButton.js';
 
 import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 
+// CUSTOM IMPORTS
+import { crearObjetos, empiezaContadores, terminaContadores } from 'functions.js';
+
 //Variables INICIALES
 let container;
 let camera, scene, renderer;
@@ -27,6 +30,9 @@ let currentLineRight = null;
 let drawingPointsLeft = [];
 let drawingPointsRight = [];
 
+// VARIABLES TAREA CARLOS
+var totalTime, balanceTime;
+
 
 init();
 animate();
@@ -46,14 +52,14 @@ function init() {
 
     const floorGeometry = new THREE.PlaneGeometry( 4, 4 );
     const floorMaterial = new THREE.MeshStandardMaterial( {
-            color: 0xeff312,
+            color: 0xeeeeee,
             roughness: 1.0,
-            metalness: 0.0,
+            metalness: 0.0
     } );
     floor = new THREE.Mesh( floorGeometry, floorMaterial );
     floor.rotation.x = - Math.PI / 2;
     floor.receiveShadow = true;
-    //scene.add( floor );
+    scene.add( floor );
 
     scene.add( new THREE.HemisphereLight( 0x808080, 0x606060 ) );
 
@@ -69,12 +75,11 @@ function init() {
 
     group = new THREE.Group();
     scene.add( group );
-    group.add(floor);
     /***********************************************FIN CÓDIGO BASE 1 */
 
     
     //AQUI SE CREABAN LOS OBJETOS. MEJOR CREAR FUNCIONES DONDE CREAR LOS QUE NOS INTERESEN
-    //crearObjetoDePrueba();
+    crearObjetoDePrueba();
 
 
     
@@ -127,6 +132,10 @@ function init() {
 
     /***********************************************FIN CÓDIGO BASE 2 */
 
+    // CODIGO PARA LOS CONTADORES DE PROGRAMA
+    empiezaContadores(window);
+    setBalanceTime(0.0);
+
 }
 
 function onWindowResize() {
@@ -146,13 +155,9 @@ function onSelectStart( event ) {
 
     const intersections = getIntersections( controller );
 
-    if ( intersections.length > 0) {
+    if ( intersections.length > 0 ) {
 
             const intersection = intersections[ 0 ];
-
-            if(intersections[0].object === floor){
-                console.log("Ha entrado!!!");
-            }
 
             /**CODIGO QUE HABIA ANTES */
 
@@ -286,8 +291,7 @@ function crearObjetoDePrueba(){
 }
 
 function capturarInterseccionParaDibujar(controller, intersection) {
-    if(intersection.object === floor){
-        console.log("He interseccionado con el suelo");
+    if(intersection == floor){
         const point = intersection.point.clone();
         if (controller === controller1) {
             // Mando izquierdo
@@ -322,9 +326,7 @@ function capturarInterseccionParaDibujar(controller, intersection) {
             scene.add(currentLineRight);
         }
     }
-    else{
-        console.log("NO he interseccionado con el suelo");
-    }
+    
 }
 
 function pintarLinea() {
@@ -384,3 +386,52 @@ function finalizarDibujoLinea(controller)
         currentLineRight = null;
     }
 }
+
+/****************************** FUNCIONES CARLOS */
+function setBalanceTime(time) {
+    balanceTime = time;
+}
+
+function getBalanceTime() {
+    return balanceTime;
+}
+
+
+/**********************************ELIMINAR SI NADIE LO UTILIZA */
+
+
+    /*const geometries = [
+            new THREE.BoxGeometry( 0.2, 0.2, 0.2 ),
+            new THREE.ConeGeometry( 0.2, 0.2, 64 ),
+            new THREE.CylinderGeometry( 0.2, 0.2, 0.2, 64 ),
+            new THREE.IcosahedronGeometry( 0.2, 8 ),
+            new THREE.TorusGeometry( 0.2, 0.04, 64, 32 )
+    ];
+
+    for ( let i = 0; i < 50; i ++ ) {
+
+            const geometry = geometries[ Math.floor( Math.random() * geometries.length ) ];
+            const material = new THREE.MeshStandardMaterial( {
+                    color: Math.random() * 0xffffff,
+                    roughness: 0.7,
+                    metalness: 0.0
+            } );
+
+            const object = new THREE.Mesh( geometry, material );
+
+            object.position.x = Math.random() * 4 - 2;
+            object.position.y = Math.random() * 2;
+            object.position.z = Math.random() * 4 - 2;
+
+            object.rotation.x = Math.random() * 2 * Math.PI;
+            object.rotation.y = Math.random() * 2 * Math.PI;
+            object.rotation.z = Math.random() * 2 * Math.PI;
+
+            object.scale.setScalar( Math.random() + 0.5 );
+
+            object.castShadow = true;
+            object.receiveShadow = true;
+
+            group.add( object );
+
+    }*/
