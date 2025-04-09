@@ -5,7 +5,7 @@ import { VRButton } from 'three/addons/webxr/VRButton.js';
 import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 
 // CUSTOM IMPORTS
-import { crearObjetos, empiezaContadores, terminaContadores } from 'functions.js';
+//import { crearObjetos, empiezaContadores, terminaContadores } from './functions.js';
 
 //Variables INICIALES
 let container;
@@ -52,14 +52,14 @@ function init() {
 
     const floorGeometry = new THREE.PlaneGeometry( 4, 4 );
     const floorMaterial = new THREE.MeshStandardMaterial( {
-            color: 0xeeeeee,
+            color: 0xeff312,
             roughness: 1.0,
             metalness: 0.0
     } );
     floor = new THREE.Mesh( floorGeometry, floorMaterial );
     floor.rotation.x = - Math.PI / 2;
     floor.receiveShadow = true;
-    scene.add( floor );
+    //scene.add( floor );
 
     scene.add( new THREE.HemisphereLight( 0x808080, 0x606060 ) );
 
@@ -75,11 +75,12 @@ function init() {
 
     group = new THREE.Group();
     scene.add( group );
+    group.add(floor);
     /***********************************************FIN CÓDIGO BASE 1 */
 
     
     //AQUI SE CREABAN LOS OBJETOS. MEJOR CREAR FUNCIONES DONDE CREAR LOS QUE NOS INTERESEN
-    crearObjetoDePrueba();
+    //crearObjetoDePrueba();
 
 
     
@@ -132,9 +133,23 @@ function init() {
 
     /***********************************************FIN CÓDIGO BASE 2 */
 
+    // Crear geometría del pozo (cilindro hueco)
+    const abyssGeometry = new THREE.CylinderGeometry(1.5, 1.5, 5, 64, 1, true); // radio, altura, segmentos
+    const abyssMaterial = new THREE.MeshStandardMaterial({
+        color: 0x111111,
+        roughness: 1,
+        metalness: 0,
+        side: THREE.BackSide // ¡esto hace que se vea desde dentro!
+    });
+
+    const abyss = new THREE.Mesh(abyssGeometry, abyssMaterial);
+    abyss.position.set(0, -2.5, 0); // la mitad de la altura negativa
+    group.add(abyss);
+
+
     // CODIGO PARA LOS CONTADORES DE PROGRAMA
-    empiezaContadores(window);
-    setBalanceTime(0.0);
+    //empiezaContadores(window);
+    //setBalanceTime(0.0);
 
 }
 
@@ -291,7 +306,7 @@ function crearObjetoDePrueba(){
 }
 
 function capturarInterseccionParaDibujar(controller, intersection) {
-    if(intersection == floor){
+    if(intersection.object == floor){
         const point = intersection.point.clone();
         if (controller === controller1) {
             // Mando izquierdo
