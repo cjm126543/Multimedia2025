@@ -1,3 +1,5 @@
+import { tempBalanceTime, balanceTime } from "./main.js";
+
 /**
  * Crea un conjunto de cubos apilados que se pueden agarrar, mover y soltar
  * @param {int} numObjetos: El numero de objetos a crear
@@ -34,10 +36,13 @@ export function crearObjetos(numObjetos, scene) {
  * @returns array[2]: tiempo de inicio del programa y contador a 0 del tiempo en equilibrio
  */
 export function empiezaContadores(window) {
-  window.addEventListener("onBalance", balanceOn);
-  window.addEventListener("offBalance", balanceOff);
-  setBalanceTime(0.0);
-  return [Date.now(), balanceTime];
+    window.addEventListener("onBalance", balanceOn);
+    window.addEventListener("offBalance", balanceOff);
+    setBalanceTime(0.0);
+
+    // Instancia fichero de escritura de tiempos de equilibrio
+
+    return [Date.now(), balanceTime];
 }
 
 /**
@@ -54,22 +59,19 @@ export function terminaContadores(window, startExecTime) {
   return [executionTime, balanceTime];
 }
 
-function checkBalance(eventL, eventR) {
-  // Se puede hacer esto???
-  let leftController = eventL.target;
-  let rightController = eventR.target;
-
-  let yMargin = 5; // En cm o relativo a ventana??
-
-  let leftY = leftController.position.y;
-  let rightY = rightController.position.y;
+export function balanceOn() {
+    tempBalanceTime.time = Date.now();
 }
 
-function balanceOn() {
-  tempBalanceTime = Date.now();
+export function balanceOff() {
+    let elapsedBalanceTime = Date.now() - tempBalanceTime.time;
+    setBalanceTime(getBalanceTime() + elapsedBalanceTime);
 }
 
-function balanceOff() {
-  let elapsedBalanceTime = Date.now() - tempBalanceTime;
-  setBalanceTime(getBalanceTime() + elapsedBalanceTime);
+export function setBalanceTime(time) {
+    balanceTime.time = time;
+}
+
+export function getBalanceTime() {
+    return balanceTime.time;
 }

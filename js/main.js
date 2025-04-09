@@ -7,11 +7,7 @@ import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 
 // CUSTOM IMPORTS
-import {
-  crearObjetos,
-  empiezaContadores,
-  terminaContadores,
-} from "./functions.js";
+import { crearObjetos, empiezaContadores, terminaContadores, setBalanceTime, getBalanceTime, balanceOn, balanceOff } from './functions.js';
 
 //Variables INICIALES
 let container;
@@ -37,7 +33,9 @@ let drawingPointsLeft = [];
 let drawingPointsRight = [];
 
 // VARIABLES TAREA CARLOS
-var totalTime, balanceTime;
+var totalTime, threshold;
+export var balanceTime;
+export var tempBalanceTime;
 
 init();
 animate();
@@ -59,18 +57,16 @@ function init() {
   );
   camera.position.set(0, 1.6, 3);
 
-  const floorGeometry = new THREE.PlaneGeometry(4, 4);
-  const floorMaterial = new THREE.MeshStandardMaterial({
-    color: 0xeeeeee,
-    roughness: 1.0,
-    metalness: 0.0,
-  });
-  floor = new THREE.Mesh(floorGeometry, floorMaterial);
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
-  scene.add(floor);
-
-  scene.add(new THREE.HemisphereLight(0x808080, 0x606060));
+    const floorGeometry = new THREE.PlaneGeometry( 4, 4 );
+    const floorMaterial = new THREE.MeshStandardMaterial( {
+            color: 0xeff312,
+            roughness: 1.0,
+            metalness: 0.0
+    } );
+    floor = new THREE.Mesh( floorGeometry, floorMaterial );
+    floor.rotation.x = - Math.PI / 2;
+    floor.receiveShadow = true;
+    //scene.add( floor );
 
   const light = new THREE.DirectionalLight(0xffffff);
   light.position.set(0, 6, 0);
@@ -86,19 +82,18 @@ function init() {
   scene.add(group);
   /***********************************************FIN CÓDIGO BASE 1 */
 
-  //AQUI SE CREABAN LOS OBJETOS. MEJOR CREAR FUNCIONES DONDE CREAR LOS QUE NOS INTERESEN
-  crearObjetoDePrueba();
+    group = new THREE.Group();
+    scene.add( group );
+    group.add(floor);
+    /***********************************************FIN CÓDIGO BASE 1 */
 
-  crearStartButton();
+    
+    //AQUI SE CREABAN LOS OBJETOS. MEJOR CREAR FUNCIONES DONDE CREAR LOS QUE NOS INTERESEN
+    //crearObjetoDePrueba();
 
-  /***********************************************CÓDIGO BASE 2 */
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.shadowMap.enabled = true;
-  renderer.xr.enabled = true;
-  container.appendChild(renderer.domElement);
+    threshold = 0.5;
+    balanceTime = { "time": 0.0 };
+    tempBalanceTime = { "time": 0.0 };
 
   document.body.appendChild(VRButton.createButton(renderer));
 
@@ -140,7 +135,28 @@ function init() {
 
   raycaster = new THREE.Raycaster();
 
-  window.addEventListener("resize", onWindowResize);
+    controller1.add( line.clone() );
+    controller2.add( line.clone() );
+
+    raycaster = new THREE.Raycaster();
+
+    window.addEventListener( 'resize', onWindowResize );
+
+    /***********************************************FIN CÓDIGO BASE 2 */
+
+    // Crear geometría del pozo (cilindro hueco)
+    const abyssGeometry = new THREE.CylinderGeometry(1.5, 1.5, 5, 64, 1, true); // radio, altura, segmentos
+    const abyssMaterial = new THREE.MeshStandardMaterial({
+        color: 0x111111,
+        roughness: 1,
+        metalness: 0,
+        side: THREE.BackSide // ¡esto hace que se vea desde dentro!
+    });
+
+    const abyss = new THREE.Mesh(abyssGeometry, abyssMaterial);
+    abyss.position.set(0, -2.5, 0); // la mitad de la altura negativa
+    group.add(abyss);
+
 
   // CODIGO PARA LOS CONTADORES DE PROGRAMA
   empiezaContadores(window);
@@ -244,8 +260,20 @@ function render() {
   intersectObjects(controller1);
   intersectObjects(controller2);
 
-  /*******FUNCIONES ALEX */
-  pintarLinea();
+    /*******FUNCIONES ALEX */
+    pintarLinea();
+
+    /*******FUNCIONES CARLOS */
+    if (controller1 && controller2) {
+        const y1 = controller1.position.y;
+        const y2 = controller2.position.y;
+
+        if (Math.abs(y1 - y2) < threshold) {
+            balanceOn();
+        } else {
+            balanceOff();
+        }
+    }
 
   renderer.render(scene, camera);
 }
@@ -273,14 +301,14 @@ function crearObjetoDePrueba() {
 }
 
 function capturarInterseccionParaDibujar(controller, intersection) {
-  if (intersection == floor) {
-    const point = intersection.point.clone();
-    if (controller === controller1) {
-      // Mando izquierdo
-      isDrawingLeft = true;
-      drawingPointsLeft = [point];
-      //const geometry = new THREE.BufferGeometry().setFromPoints(drawingPointsLeft);
-      //let material = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 10 }); // Azul
+    if(intersection.object == floor){
+        const point = intersection.point.clone();
+        if (controller === controller1) {
+            // Mando izquierdo
+            isDrawingLeft = true;
+            drawingPointsLeft = [point];
+            //const geometry = new THREE.BufferGeometry().setFromPoints(drawingPointsLeft);
+            //let material = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 10 }); // Azul
 
       const dummyPoint = point.clone().add(new THREE.Vector3(0.001, 0, 0));
       const curve = new THREE.CatmullRomCurve3([point, dummyPoint]);
@@ -354,14 +382,6 @@ function pintarLinea() {
   }
 }
 
-/****************************** FUNCIONES CARLOS */
-function setBalanceTime(time) {
-  balanceTime = time;
-}
-
-function getBalanceTime() {
-  return balanceTime;
-}
 
 function finalizarDibujoLinea(controller) {
   if (controller === controller1) {
