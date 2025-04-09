@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { VRButton } from 'three/addons/webxr/VRButton.js';
 
 import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
-
+import { getStartButton, capturarInterseccionIniciarJuego } from "./buttons.js"
 // CUSTOM IMPORTS
 //import { crearObjetos, empiezaContadores, terminaContadores } from './functions.js';
 
@@ -76,6 +76,7 @@ function init() {
     group = new THREE.Group();
     scene.add( group );
     group.add(floor);
+    group.add(getStartButton())
     /***********************************************FIN CÓDIGO BASE 1 */
 
     
@@ -184,7 +185,7 @@ function onSelectStart( event ) {
 
             /**FUNCIONES ALEX */
             capturarInterseccionParaDibujar(controller,intersection);
-
+            capturarInterseccionIniciarJuego(intersection, group);
             
 
     }
