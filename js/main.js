@@ -1,11 +1,17 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
-import { VRButton } from 'three/addons/webxr/VRButton.js';
+import { VRButton } from "three/addons/webxr/VRButton.js";
 
-import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
+
+// CUSTOM IMPORTS
+import {
+  crearObjetos,
+  empiezaContadores,
+  terminaContadores,
+} from "./functions.js";
 
 //Variables INICIALES
 let container;
@@ -29,6 +35,9 @@ let currentLineLeft = null;
 let currentLineRight = null;
 let drawingPointsLeft = [];
 let drawingPointsRight = [];
+
+// VARIABLES TAREA CARLOS
+var totalTime, balanceTime;
 
 init();
 animate();
@@ -125,17 +134,17 @@ function init() {
   ]);
 
   const line = new THREE.Line(geometry);
+  line.computeLineDistances(); // ← esto es obligatorio
   line.name = "line";
   line.scale.z = 5;
-
-  controller1.add(line.clone());
-  controller2.add(line.clone());
 
   raycaster = new THREE.Raycaster();
 
   window.addEventListener("resize", onWindowResize);
 
-  /***********************************************FIN CÓDIGO BASE 2 */
+  // CODIGO PARA LOS CONTADORES DE PROGRAMA
+  empiezaContadores(window);
+  setBalanceTime(0.0);
 }
 
 function onWindowResize() {
@@ -270,21 +279,30 @@ function capturarInterseccionParaDibujar(controller, intersection) {
       // Mando izquierdo
       isDrawingLeft = true;
       drawingPointsLeft = [point];
-      const geometry = new THREE.BufferGeometry().setFromPoints(
-        drawingPointsLeft
-      );
-      const material = new THREE.LineBasicMaterial({ color: 0x0000ff }); // Azul
-      currentLineLeft = new THREE.Line(geometry, material);
+      //const geometry = new THREE.BufferGeometry().setFromPoints(drawingPointsLeft);
+      //let material = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 10 }); // Azul
+
+      const dummyPoint = point.clone().add(new THREE.Vector3(0.001, 0, 0));
+      const curve = new THREE.CatmullRomCurve3([point, dummyPoint]);
+      const geometry = new THREE.TubeGeometry(curve, 100, 0.01, 8, false); // radio = grosor
+      const material = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // Azul
+
+      //material.resolution.set(window.innerWidth, window.innerHeight);
+      currentLineLeft = new THREE.Mesh(geometry, material);
       scene.add(currentLineLeft);
     } else if (controller === controller2) {
       // Mando derecho
       isDrawingRight = true;
       drawingPointsRight = [point];
-      const geometry = new THREE.BufferGeometry().setFromPoints(
-        drawingPointsRight
-      );
-      const material = new THREE.LineBasicMaterial({ color: 0xff0000 }); // Rojo
-      currentLineRight = new THREE.Line(geometry, material);
+      //const geometry = new THREE.BufferGeometry().setFromPoints(drawingPointsRight);
+      //const material = new THREE.LineBasicMaterial({ color: 0xff0000,linewidth: 10 }); // Rojo
+
+      const dummyPoint = point.clone().add(new THREE.Vector3(0.001, 0, 0));
+      const curve = new THREE.CatmullRomCurve3([point, dummyPoint]);
+      const geometry = new THREE.TubeGeometry(curve, 100, 0.01, 8, false); // radio = grosor
+      const material = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // Azul
+
+      currentLineRight = new THREE.Mesh(geometry, material);
       scene.add(currentLineRight);
     }
   }
@@ -293,41 +311,56 @@ function capturarInterseccionParaDibujar(controller, intersection) {
 function pintarLinea() {
   if (isDrawingLeft) {
     const intersections = getIntersections(controller1);
-    if (intersections.length > 0) {
+    if (intersections.length > 0 && intersections[0].object === floor) {
       const point = intersections[0].point.clone();
-
-      // Verificar distancia mínima
       const lastPoint = drawingPointsLeft[drawingPointsLeft.length - 1];
-      if (!lastPoint || point.distanceTo(lastPoint) > 0.02) {
-        // ← mínimo 2 cm
+
+      if (!lastPoint || point.distanceTo(lastPoint) > 0.01) {
         drawingPointsLeft.push(point);
 
-        const curve = new THREE.CatmullRomCurve3(drawingPointsLeft);
-        const smoothPoints = curve.getPoints(100); // 100 puntos suaves
+        if (drawingPointsLeft.length >= 2) {
+          const curve = new THREE.CatmullRomCurve3(drawingPointsLeft);
+          const geometry = new THREE.TubeGeometry(curve, 64, 0.09, 8, false);
+          const material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
 
-        currentLineLeft.geometry.setFromPoints(smoothPoints);
+          if (currentLineLeft) scene.remove(currentLineLeft);
+          currentLineLeft = new THREE.Mesh(geometry, material);
+          scene.add(currentLineLeft);
+        }
       }
     }
   }
 
   if (isDrawingRight) {
     const intersections = getIntersections(controller2);
-    if (intersections.length > 0) {
+    if (intersections.length > 0 && intersections[0].object === floor) {
       const point = intersections[0].point.clone();
-
-      // Verificar distancia mínima
       const lastPoint = drawingPointsRight[drawingPointsRight.length - 1];
-      if (!lastPoint || point.distanceTo(lastPoint) > 0.02) {
-        // ← mínimo 2 cm
+
+      if (!lastPoint || point.distanceTo(lastPoint) > 0.01) {
         drawingPointsRight.push(point);
 
-        const curve = new THREE.CatmullRomCurve3(drawingPointsRight);
-        const smoothPoints = curve.getPoints(100); // 100 puntos suaves
+        if (drawingPointsRight.length >= 2) {
+          const curve = new THREE.CatmullRomCurve3(drawingPointsRight);
+          const geometry = new THREE.TubeGeometry(curve, 64, 0.09, 8, false);
+          const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 
-        currentLineRight.geometry.setFromPoints(smoothPoints);
+          if (currentLineRight) scene.remove(currentLineRight);
+          currentLineRight = new THREE.Mesh(geometry, material);
+          scene.add(currentLineRight);
+        }
       }
     }
   }
+}
+
+/****************************** FUNCIONES CARLOS */
+function setBalanceTime(time) {
+  balanceTime = time;
+}
+
+function getBalanceTime() {
+  return balanceTime;
 }
 
 function finalizarDibujoLinea(controller) {
