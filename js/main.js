@@ -5,7 +5,7 @@ import { VRButton } from 'three/addons/webxr/VRButton.js';
 import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 
 // CUSTOM IMPORTS
-import { crearObjetos, empiezaContadores, terminaContadores } from 'functions.js';
+import { crearObjetos, empiezaContadores, terminaContadores, setBalanceTime, getBalanceTime } from 'functions.js';
 
 //Variables INICIALES
 let container;
@@ -31,7 +31,8 @@ let drawingPointsLeft = [];
 let drawingPointsRight = [];
 
 // VARIABLES TAREA CARLOS
-var totalTime, balanceTime;
+var totalTime;
+export var balanceTime;
 
 
 init();
@@ -386,14 +387,6 @@ function finalizarDibujoLinea(controller)
     }
 }
 
-/****************************** FUNCIONES CARLOS */
-function setBalanceTime(time) {
-    balanceTime = time;
-}
-
-function getBalanceTime() {
-    return balanceTime;
-}
 
 
 /**********************************ELIMINAR SI NADIE LO UTILIZA */

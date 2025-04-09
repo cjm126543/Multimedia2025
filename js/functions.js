@@ -37,6 +37,9 @@ export function empiezaContadores(window) {
     window.addEventListener("onBalance", balanceOn);
     window.addEventListener("offBalance", balanceOff);
     setBalanceTime(0.0);
+
+    // Instancia fichero de escritura de tiempos de equilibrio
+
     return [Date.now(), balanceTime];
 }
 
@@ -73,4 +76,12 @@ function balanceOn() {
 function balanceOff() {
     let elapsedBalanceTime = Date.now() - tempBalanceTime;
     setBalanceTime(getBalanceTime() + elapsedBalanceTime);
+}
+
+export function setBalanceTime(time) {
+    balanceTime = time;
+}
+
+export function getBalanceTime() {
+    return balanceTime;
 }
