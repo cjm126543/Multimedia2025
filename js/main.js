@@ -99,6 +99,7 @@ function init() {
 
   // controllers
 
+  renderer = new THREE.WebGLRenderer({ antialias: true});
   controller1 = renderer.xr.getController(0);
   controller1.addEventListener("selectstart", onSelectStart);
   controller1.addEventListener("selectend", onSelectEnd);
