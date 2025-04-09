@@ -134,7 +134,6 @@ function init() {
 
     // CODIGO PARA LOS CONTADORES DE PROGRAMA
     empiezaContadores(window);
-    setBalanceTime(0.0);
 
 }
 
