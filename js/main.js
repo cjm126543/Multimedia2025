@@ -1,13 +1,11 @@
-import * as THREE from "three";
+import * as THREE from 'three';
 
-import { VRButton } from "three/addons/webxr/VRButton.js";
+import { VRButton } from 'three/addons/webxr/VRButton.js';
 
-import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js";
-import { FontLoader } from "three/addons/loaders/FontLoader.js";
-import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
+import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 
 // CUSTOM IMPORTS
-import { crearObjetos, empiezaContadores, terminaContadores, setBalanceTime, getBalanceTime, balanceOn, balanceOff } from './functions.js';
+//import { crearObjetos, empiezaContadores, terminaContadores } from './functions.js';
 
 //Variables INICIALES
 let container;
@@ -33,29 +31,24 @@ let drawingPointsLeft = [];
 let drawingPointsRight = [];
 
 // VARIABLES TAREA CARLOS
-var totalTime, threshold;
-export var balanceTime;
-export var tempBalanceTime;
+var totalTime, balanceTime;
+
 
 init();
 animate();
 
 function init() {
-  /***********************************************CÓDIGO BASE 1 */
 
-  container = document.createElement("div");
-  document.body.appendChild(container);
+    /***********************************************CÓDIGO BASE 1 */
 
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x808080);
+    container = document.createElement( 'div' );
+    document.body.appendChild( container );
 
-  camera = new THREE.PerspectiveCamera(
-    50,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    10
-  );
-  camera.position.set(0, 1.6, 3);
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color( 0x808080 );
+
+    camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 10 );
+    camera.position.set( 0, 1.6, 3 );
 
     const floorGeometry = new THREE.PlaneGeometry( 4, 4 );
     const floorMaterial = new THREE.MeshStandardMaterial( {
@@ -68,19 +61,17 @@ function init() {
     floor.receiveShadow = true;
     //scene.add( floor );
 
-  const light = new THREE.DirectionalLight(0xffffff);
-  light.position.set(0, 6, 0);
-  light.castShadow = true;
-  light.shadow.camera.top = 2;
-  light.shadow.camera.bottom = -2;
-  light.shadow.camera.right = 2;
-  light.shadow.camera.left = -2;
-  light.shadow.mapSize.set(4096, 4096);
-  scene.add(light);
+    scene.add( new THREE.HemisphereLight( 0x808080, 0x606060 ) );
 
-  group = new THREE.Group();
-  scene.add(group);
-  /***********************************************FIN CÓDIGO BASE 1 */
+    const light = new THREE.DirectionalLight( 0xffffff );
+    light.position.set( 0, 6, 0 );
+    light.castShadow = true;
+    light.shadow.camera.top = 2;
+    light.shadow.camera.bottom = - 2;
+    light.shadow.camera.right = 2;
+    light.shadow.camera.left = - 2;
+    light.shadow.mapSize.set( 4096, 4096 );
+    scene.add( light );
 
     group = new THREE.Group();
     scene.add( group );
@@ -91,50 +82,47 @@ function init() {
     //AQUI SE CREABAN LOS OBJETOS. MEJOR CREAR FUNCIONES DONDE CREAR LOS QUE NOS INTERESEN
     //crearObjetoDePrueba();
 
-    threshold = 0.5;
-    balanceTime = { "time": 0.0 };
-    tempBalanceTime = { "time": 0.0 };
 
-  document.body.appendChild(VRButton.createButton(renderer));
+    
+    /***********************************************CÓDIGO BASE 2 */
+    renderer = new THREE.WebGLRenderer( { antialias: true } );
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.shadowMap.enabled = true;
+    renderer.xr.enabled = true;
+    container.appendChild( renderer.domElement );
 
-  // controllers
+    document.body.appendChild( VRButton.createButton( renderer ) );
 
-  renderer = new THREE.WebGLRenderer({ antialias: true});
-  controller1 = renderer.xr.getController(0);
-  controller1.addEventListener("selectstart", onSelectStart);
-  controller1.addEventListener("selectend", onSelectEnd);
-  scene.add(controller1);
+    // controllers
 
-  controller2 = renderer.xr.getController(1);
-  controller2.addEventListener("selectstart", onSelectStart);
-  controller2.addEventListener("selectend", onSelectEnd);
-  scene.add(controller2);
+    controller1 = renderer.xr.getController( 0 );
+    controller1.addEventListener( 'selectstart', onSelectStart );
+    controller1.addEventListener( 'selectend', onSelectEnd );
+    scene.add( controller1 );
 
-  const controllerModelFactory = new XRControllerModelFactory();
+    controller2 = renderer.xr.getController( 1 );
+    controller2.addEventListener( 'selectstart', onSelectStart );
+    controller2.addEventListener( 'selectend', onSelectEnd );
+    scene.add( controller2 );
 
-  controllerGrip1 = renderer.xr.getControllerGrip(0);
-  controllerGrip1.add(
-    controllerModelFactory.createControllerModel(controllerGrip1)
-  );
-  scene.add(controllerGrip1);
+    const controllerModelFactory = new XRControllerModelFactory();
 
-  controllerGrip2 = renderer.xr.getControllerGrip(1);
-  controllerGrip2.add(
-    controllerModelFactory.createControllerModel(controllerGrip2)
-  );
-  scene.add(controllerGrip2);
+    controllerGrip1 = renderer.xr.getControllerGrip( 0 );
+    controllerGrip1.add( controllerModelFactory.createControllerModel( controllerGrip1 ) );
+    scene.add( controllerGrip1 );
 
-  const geometry = new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(0, 0, 0),
-    new THREE.Vector3(0, 0, -1),
-  ]);
+    controllerGrip2 = renderer.xr.getControllerGrip( 1 );
+    controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
+    scene.add( controllerGrip2 );
 
-  const line = new THREE.Line(geometry);
-  line.computeLineDistances(); // ← esto es obligatorio
-  line.name = "line";
-  line.scale.z = 5;
+    const geometry = new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, - 1 ) ] );
 
-  raycaster = new THREE.Raycaster();
+    const line = new THREE.Line( geometry );
+    line.computeLineDistances(); // ← esto es obligatorio
+    line.name = 'line';
+    line.scale.z = 5;
 
     controller1.add( line.clone() );
     controller2.add( line.clone() );
@@ -159,48 +147,57 @@ function init() {
     group.add(abyss);
 
 
-  // CODIGO PARA LOS CONTADORES DE PROGRAMA
-  empiezaContadores(window);
-  setBalanceTime(0.0);
+    // CODIGO PARA LOS CONTADORES DE PROGRAMA
+    //empiezaContadores(window);
+    //setBalanceTime(0.0);
+
 }
 
 function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
 
-  renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize( window.innerWidth, window.innerHeight );
+
 }
 
-function onSelectStart(event) {
-  const controller = event.target;
+function onSelectStart( event ) {
 
-  const intersections = getIntersections(controller);
 
-  console.log("capturarInterseccionIniciarJuego");
 
-  if (intersections.length > 0) {
-    const intersection = intersections[0];
+    const controller = event.target;
 
-    /**CODIGO QUE HABIA ANTES */
+    const intersections = getIntersections( controller );
 
-    /*const object = intersection.object;
+    if ( intersections.length > 0 ) {
+
+            const intersection = intersections[ 0 ];
+
+            /**CODIGO QUE HABIA ANTES */
+
+            /*const object = intersection.object;
             object.material.emissive.b = 1;
             controller.attach( object );
 
             controller.userData.selected = object;*/
 
-    /**FUNCIONES ALEX */
-    capturarInterseccionParaDibujar(controller, intersection);
-    capturarInterseccionIniciarJuego(intersection);
-  }
+            /**FUNCIONES ALEX */
+            capturarInterseccionParaDibujar(controller,intersection);
+
+            
+
+    }
+
 }
 
-function onSelectEnd(event) {
-  const controller = event.target;
+function onSelectEnd( event ) {
 
-  /**CODIGO QUE HABIA ANTES */
+    const controller = event.target;
 
-  /*if ( controller.userData.selected !== undefined ) {
+    /**CODIGO QUE HABIA ANTES */
+
+    /*if ( controller.userData.selected !== undefined ) {
 
             const object = controller.userData.selected;
             object.material.emissive.b = 0;
@@ -210,95 +207,102 @@ function onSelectEnd(event) {
 
     }*/
 
-  /**FUNCIONES ALEX */
-  finalizarDibujoLinea(controller);
+    /**FUNCIONES ALEX */
+    finalizarDibujoLinea(controller);
+    
+
+
 }
 
-function getIntersections(controller) {
-  tempMatrix.identity().extractRotation(controller.matrixWorld);
+function getIntersections( controller ) {
 
-  raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
-  raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+    tempMatrix.identity().extractRotation( controller.matrixWorld );
 
-  return raycaster.intersectObjects(group.children, true);
+    raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
+    raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( tempMatrix );
+
+    return raycaster.intersectObjects( group.children, false );
+
 }
 
-function intersectObjects(controller) {
-  // Do not highlight when already selected
+function intersectObjects( controller ) {
 
-  if (controller.userData.selected !== undefined) return;
+    // Do not highlight when already selected
 
-  const line = controller.getObjectByName("line");
-  const intersections = getIntersections(controller);
+    if ( controller.userData.selected !== undefined ) return;
 
-  if (intersections.length > 0) {
-    const intersection = intersections[0];
+    const line = controller.getObjectByName( 'line' );
+    const intersections = getIntersections( controller );
 
-    const object = intersection.object;
-    object.material.emissive.r = 1;
-    intersected.push(object);
+    if ( intersections.length > 0 ) {
 
-    line.scale.z = intersection.distance;
-  } else {
-    line.scale.z = 5;
-  }
+            const intersection = intersections[ 0 ];
+
+            const object = intersection.object;
+            object.material.emissive.r = 1;
+            intersected.push( object );
+
+            line.scale.z = intersection.distance;
+
+    } else {
+
+            line.scale.z = 5;
+    }
+
 }
 
 function cleanIntersected() {
-  while (intersected.length) {
-    const object = intersected.pop();
-    object.material.emissive.r = 0;
-  }
+
+    while ( intersected.length ) {
+
+            const object = intersected.pop();
+            object.material.emissive.r = 0;
+
+    }
+
 }
 
 function animate() {
-  renderer.setAnimationLoop(render);
+
+    renderer.setAnimationLoop( render );
+
 }
 
 function render() {
-  cleanIntersected();
 
-  intersectObjects(controller1);
-  intersectObjects(controller2);
+    cleanIntersected();
+
+    intersectObjects( controller1 );
+    intersectObjects( controller2 );
 
     /*******FUNCIONES ALEX */
     pintarLinea();
 
-    /*******FUNCIONES CARLOS */
-    if (controller1 && controller2) {
-        const y1 = controller1.position.y;
-        const y2 = controller2.position.y;
+    renderer.render( scene, camera );
 
-        if (Math.abs(y1 - y2) < threshold) {
-            balanceOn();
-        } else {
-            balanceOff();
-        }
-    }
-
-  renderer.render(scene, camera);
 }
+
 
 /*****************************************************FUNCIONES ALEX */
 
-function crearObjetoDePrueba() {
-  let geo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-  let material = new THREE.MeshStandardMaterial({
-    color: 0xf2233f,
-    roughness: 0.7,
-    metalness: 0.0,
-  });
+function crearObjetoDePrueba(){
+    let geo = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
+    let material = new THREE.MeshStandardMaterial( {
+        color: 0xf2233f,
+        roughness: 0.7,
+        metalness: 0.0
+    } );
 
-  let object = new THREE.Mesh(geo, material);
-  object.position.x = 0;
-  object.position.y = 1.5;
-  object.position.z = 2;
+    let object = new THREE.Mesh( geo, material );
+    object.position.x = 0;
+    object.position.y = 1.5;
+    object.position.z = 2;
 
-  object.scale.setScalar(Math.random() + 0.5);
+    object.scale.setScalar( Math.random() + 0.5 );
 
-  object.castShadow = true;
-  object.receiveShadow = true;
-  group.add(object);
+    object.castShadow = true;
+    object.receiveShadow = true;
+    group.add(object);
 }
 
 function capturarInterseccionParaDibujar(controller, intersection) {
@@ -311,142 +315,107 @@ function capturarInterseccionParaDibujar(controller, intersection) {
             //const geometry = new THREE.BufferGeometry().setFromPoints(drawingPointsLeft);
             //let material = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 10 }); // Azul
 
-      const dummyPoint = point.clone().add(new THREE.Vector3(0.001, 0, 0));
-      const curve = new THREE.CatmullRomCurve3([point, dummyPoint]);
-      const geometry = new THREE.TubeGeometry(curve, 100, 0.01, 8, false); // radio = grosor
-      const material = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // Azul
+            const dummyPoint = point.clone().add(new THREE.Vector3(0.001, 0, 0));
+            const curve = new THREE.CatmullRomCurve3([point, dummyPoint]);
+            const geometry = new THREE.TubeGeometry(curve, 100, 0.01, 8, false); // radio = grosor
+            const material = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // Azul
 
-      //material.resolution.set(window.innerWidth, window.innerHeight);
-      currentLineLeft = new THREE.Mesh(geometry, material);
-      scene.add(currentLineLeft);
-    } else if (controller === controller2) {
-      // Mando derecho
-      isDrawingRight = true;
-      drawingPointsRight = [point];
-      //const geometry = new THREE.BufferGeometry().setFromPoints(drawingPointsRight);
-      //const material = new THREE.LineBasicMaterial({ color: 0xff0000,linewidth: 10 }); // Rojo
 
-      const dummyPoint = point.clone().add(new THREE.Vector3(0.001, 0, 0));
-      const curve = new THREE.CatmullRomCurve3([point, dummyPoint]);
-      const geometry = new THREE.TubeGeometry(curve, 100, 0.01, 8, false); // radio = grosor
-      const material = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // Azul
+            //material.resolution.set(window.innerWidth, window.innerHeight);
+            currentLineLeft = new THREE.Mesh(geometry, material);
+            scene.add(currentLineLeft);
+        } else if (controller === controller2) {
+            // Mando derecho
+            isDrawingRight = true;
+            drawingPointsRight = [point];
+            //const geometry = new THREE.BufferGeometry().setFromPoints(drawingPointsRight);
+            //const material = new THREE.LineBasicMaterial({ color: 0xff0000,linewidth: 10 }); // Rojo
 
-      currentLineRight = new THREE.Mesh(geometry, material);
-      scene.add(currentLineRight);
+            const dummyPoint = point.clone().add(new THREE.Vector3(0.001, 0, 0));
+            const curve = new THREE.CatmullRomCurve3([point, dummyPoint]);
+            const geometry = new THREE.TubeGeometry(curve, 100, 0.01, 8, false); // radio = grosor
+            const material = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // Azul
+
+
+            currentLineRight = new THREE.Mesh(geometry, material);
+            scene.add(currentLineRight);
+        }
     }
-  }
+    
 }
 
 function pintarLinea() {
-  if (isDrawingLeft) {
-    const intersections = getIntersections(controller1);
-    if (intersections.length > 0 && intersections[0].object === floor) {
-      const point = intersections[0].point.clone();
-      const lastPoint = drawingPointsLeft[drawingPointsLeft.length - 1];
+    if (isDrawingLeft) {
+        const intersections = getIntersections(controller1);
+        if (intersections.length > 0 && intersections[0].object === floor) {
+            const point = intersections[0].point.clone();
+            const lastPoint = drawingPointsLeft[drawingPointsLeft.length - 1];
 
-      if (!lastPoint || point.distanceTo(lastPoint) > 0.01) {
-        drawingPointsLeft.push(point);
+            if (!lastPoint || point.distanceTo(lastPoint) > 0.01) {
+                drawingPointsLeft.push(point);
 
-        if (drawingPointsLeft.length >= 2) {
-          const curve = new THREE.CatmullRomCurve3(drawingPointsLeft);
-          const geometry = new THREE.TubeGeometry(curve, 64, 0.09, 8, false);
-          const material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+                if (drawingPointsLeft.length >= 2) {
+                    const curve = new THREE.CatmullRomCurve3(drawingPointsLeft);
+                    const geometry = new THREE.TubeGeometry(curve, 64, 0.09, 8, false);
+                    const material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
 
-          if (currentLineLeft) scene.remove(currentLineLeft);
-          currentLineLeft = new THREE.Mesh(geometry, material);
-          scene.add(currentLineLeft);
+                    if (currentLineLeft) scene.remove(currentLineLeft);
+                    currentLineLeft = new THREE.Mesh(geometry, material);
+                    scene.add(currentLineLeft);
+                }
+            }
         }
-      }
     }
-  }
 
-  if (isDrawingRight) {
-    const intersections = getIntersections(controller2);
-    if (intersections.length > 0 && intersections[0].object === floor) {
-      const point = intersections[0].point.clone();
-      const lastPoint = drawingPointsRight[drawingPointsRight.length - 1];
+    if (isDrawingRight) {
+        const intersections = getIntersections(controller2);
+        if (intersections.length > 0 && intersections[0].object === floor) {
+            const point = intersections[0].point.clone();
+            const lastPoint = drawingPointsRight[drawingPointsRight.length - 1];
 
-      if (!lastPoint || point.distanceTo(lastPoint) > 0.01) {
-        drawingPointsRight.push(point);
+            if (!lastPoint || point.distanceTo(lastPoint) > 0.01) {
+                drawingPointsRight.push(point);
 
-        if (drawingPointsRight.length >= 2) {
-          const curve = new THREE.CatmullRomCurve3(drawingPointsRight);
-          const geometry = new THREE.TubeGeometry(curve, 64, 0.09, 8, false);
-          const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+                if (drawingPointsRight.length >= 2) {
+                    const curve = new THREE.CatmullRomCurve3(drawingPointsRight);
+                    const geometry = new THREE.TubeGeometry(curve, 64, 0.09, 8, false);
+                    const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 
-          if (currentLineRight) scene.remove(currentLineRight);
-          currentLineRight = new THREE.Mesh(geometry, material);
-          scene.add(currentLineRight);
+                    if (currentLineRight) scene.remove(currentLineRight);
+                    currentLineRight = new THREE.Mesh(geometry, material);
+                    scene.add(currentLineRight);
+                }
+            }
         }
-      }
     }
-  }
 }
 
 
-function finalizarDibujoLinea(controller) {
-  if (controller === controller1) {
-    isDrawingLeft = false;
-    currentLineLeft = null;
-  } else if (controller === controller2) {
-    isDrawingRight = false;
-    currentLineRight = null;
-  }
+function finalizarDibujoLinea(controller)
+{
+    if (controller === controller1) {
+        isDrawingLeft = false;
+        currentLineLeft = null;
+    } else if (controller === controller2) {
+        isDrawingRight = false;
+        currentLineRight = null;
+    }
 }
 
-// Funciones nikol
-function crearStartButton() {
-  const botonGroup = new THREE.Group();
-  botonGroup.name = "botonStart";
-
-  const geometry = new THREE.BoxGeometry(0.4, 0.2, 0.1);
-  const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-  const botonMesh = new THREE.Mesh(geometry, material);
-  botonGroup.add(botonMesh);
-
-  const loader = new FontLoader();
-  loader.load("fonts/helvetiker_regular.typeface.json", function (font) {
-    const textGeometry = new TextGeometry("START", {
-      font: font,
-      size: 0.06,
-      height: 0.005,
-    });
-
-    // Centrar el texto respecto al botón
-    textGeometry.computeBoundingBox();
-    const bbox = textGeometry.boundingBox;
-    const textWidth = bbox.max.x - bbox.min.x;
-    const textHeight = bbox.max.y - bbox.min.y;
-
-    const textMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
-    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-
-    textMesh.position.set(-textWidth / 2, -textHeight / 2, 0.051);
-    botonGroup.add(textMesh);
-  });
-
-  botonGroup.position.set(0, 1.5, -1);
-  group.add(botonGroup);
+/****************************** FUNCIONES CARLOS */
+function setBalanceTime(time) {
+    balanceTime = time;
 }
 
-function capturarInterseccionIniciarJuego(intersection) {
-  const objeto = intersection.object;
-  const boton = objeto.parent;
-
-  if (boton.name === "botonStart") {
-    console.log("startGame");
-    startGame();
-    group.remove(boton);
-  }
+function getBalanceTime() {
+    return balanceTime;
 }
 
-function startGame() {
-  console.log("iniciar contador");
-}
 
 /**********************************ELIMINAR SI NADIE LO UTILIZA */
 
-/*const geometries = [
+
+    /*const geometries = [
             new THREE.BoxGeometry( 0.2, 0.2, 0.2 ),
             new THREE.ConeGeometry( 0.2, 0.2, 64 ),
             new THREE.CylinderGeometry( 0.2, 0.2, 0.2, 64 ),
