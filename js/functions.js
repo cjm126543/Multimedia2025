@@ -1,3 +1,5 @@
+import { tempBalanceTime, balanceTime } from "./main.js";
+
 /**
  * Crea un conjunto de cubos apilados que se pueden agarrar, mover y soltar
  * @param {int} numObjetos: El numero de objetos a crear 
@@ -57,31 +59,19 @@ export function terminaContadores(window, startExecTime) {
     return [executionTime, balanceTime];
 }
 
-function checkBalance(eventL, eventR) {
-    // Se puede hacer esto???
-    let leftController = eventL.target;
-    let rightController = eventR.target;
-
-    let yMargin = 5; // En cm o relativo a ventana??
-
-    let leftY = leftController.position.y;
-    let rightY = rightController.position.y;
-
+export function balanceOn() {
+    tempBalanceTime.time = Date.now();
 }
 
-function balanceOn() {
-    tempBalanceTime = Date.now();
-}
-
-function balanceOff() {
-    let elapsedBalanceTime = Date.now() - tempBalanceTime;
+export function balanceOff() {
+    let elapsedBalanceTime = Date.now() - tempBalanceTime.time;
     setBalanceTime(getBalanceTime() + elapsedBalanceTime);
 }
 
 export function setBalanceTime(time) {
-    balanceTime = time;
+    balanceTime.time = time;
 }
 
 export function getBalanceTime() {
-    return balanceTime;
+    return balanceTime.time;
 }

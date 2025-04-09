@@ -5,7 +5,7 @@ import { VRButton } from 'three/addons/webxr/VRButton.js';
 import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 
 // CUSTOM IMPORTS
-import { crearObjetos, empiezaContadores, terminaContadores, setBalanceTime, getBalanceTime } from 'functions.js';
+import { crearObjetos, empiezaContadores, terminaContadores, setBalanceTime, getBalanceTime, balanceOn, balanceOff } from './functions.js';
 
 //Variables INICIALES
 let container;
@@ -31,8 +31,9 @@ let drawingPointsLeft = [];
 let drawingPointsRight = [];
 
 // VARIABLES TAREA CARLOS
-var totalTime;
+var totalTime, threshold;
 export var balanceTime;
+export var tempBalanceTime;
 
 
 init();
@@ -83,6 +84,9 @@ function init() {
     //AQUI SE CREABAN LOS OBJETOS. MEJOR CREAR FUNCIONES DONDE CREAR LOS QUE NOS INTERESEN
     //crearObjetoDePrueba();
 
+    threshold = 0.5;
+    balanceTime = { "time": 0.0 };
+    tempBalanceTime = { "time": 0.0 };
 
     
     /***********************************************CÓDIGO BASE 2 */
@@ -149,8 +153,8 @@ function init() {
 
 
     // CODIGO PARA LOS CONTADORES DE PROGRAMA
-    //empiezaContadores(window);
-    //setBalanceTime(0.0);
+    empiezaContadores(window);
+    setBalanceTime(0.0);
 
 }
 
@@ -278,6 +282,18 @@ function render() {
 
     /*******FUNCIONES ALEX */
     pintarLinea();
+
+    /*******FUNCIONES CARLOS */
+    if (controller1 && controller2) {
+        const y1 = controller1.position.y;
+        const y2 = controller2.position.y;
+
+        if (Math.abs(y1 - y2) < threshold) {
+            balanceOn();
+        } else {
+            balanceOff();
+        }
+    }
 
     renderer.render( scene, camera );
 
