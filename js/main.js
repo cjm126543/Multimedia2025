@@ -163,66 +163,30 @@ function onWindowResize() {
 
 }
 
-function onSelectStart( event ) {
-
-
-
+function onSelectStart(event) {
     const controller = event.target;
+    const intersections = getIntersections(controller);
 
-    const intersections = getIntersections( controller );
+    if (intersections.length > 0) {
+        const intersection = intersections[0];
 
-    if ( intersections.length > 0 ) {
-
-            const intersection = intersections[ 0 ];
-
-            /**CODIGO QUE HABIA ANTES */
-
-            /*const object = intersection.object;
-            object.material.emissive.b = 1;
-            controller.attach( object );
-
-            controller.userData.selected = object;*/
-
-            /**FUNCIONES ALEX */
-            capturarInterseccionParaDibujar(controller,intersection);
-            capturarInterseccionIniciarJuego(intersection, group);
-            
-
+        capturarInterseccionParaDibujar(controller,intersection);
+        capturarInterseccionIniciarJuego(intersection, group);
     }
-
 }
 
 function onSelectEnd( event ) {
-
     const controller = event.target;
-
-    /**CODIGO QUE HABIA ANTES */
-
-    /*if ( controller.userData.selected !== undefined ) {
-
-            const object = controller.userData.selected;
-            object.material.emissive.b = 0;
-            group.attach( object );
-
-            controller.userData.selected = undefined;
-
-    }*/
-
-    /**FUNCIONES ALEX */
     finalizarDibujoLinea(controller);
-    
-
-
 }
 
-function getIntersections( controller ) {
-
+function getIntersections(controller) {
     tempMatrix.identity().extractRotation( controller.matrixWorld );
 
     raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
     raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( tempMatrix );
 
-    return raycaster.intersectObjects( group.children, false );
+    return raycaster.intersectObjects(group.children, true); // cambiado por nikol a true
 
 }
 
@@ -253,34 +217,25 @@ function intersectObjects( controller ) {
 }
 
 function cleanIntersected() {
-
     while ( intersected.length ) {
-
-            const object = intersected.pop();
-            object.material.emissive.r = 0;
-
+        const object = intersected.pop();
+        object.material.emissive.r = 0;
     }
-
 }
 
 function animate() {
-
     renderer.setAnimationLoop( render );
-
 }
 
 function render() {
-
     cleanIntersected();
 
-    intersectObjects( controller1 );
-    intersectObjects( controller2 );
+    intersectObjects(controller1);
+    intersectObjects(controller2);
 
-    /*******FUNCIONES ALEX */
     pintarLinea();
 
     renderer.render( scene, camera );
-
 }
 
 
@@ -411,43 +366,3 @@ function setBalanceTime(time) {
 function getBalanceTime() {
     return balanceTime;
 }
-
-
-/**********************************ELIMINAR SI NADIE LO UTILIZA */
-
-
-    /*const geometries = [
-            new THREE.BoxGeometry( 0.2, 0.2, 0.2 ),
-            new THREE.ConeGeometry( 0.2, 0.2, 64 ),
-            new THREE.CylinderGeometry( 0.2, 0.2, 0.2, 64 ),
-            new THREE.IcosahedronGeometry( 0.2, 8 ),
-            new THREE.TorusGeometry( 0.2, 0.04, 64, 32 )
-    ];
-
-    for ( let i = 0; i < 50; i ++ ) {
-
-            const geometry = geometries[ Math.floor( Math.random() * geometries.length ) ];
-            const material = new THREE.MeshStandardMaterial( {
-                    color: Math.random() * 0xffffff,
-                    roughness: 0.7,
-                    metalness: 0.0
-            } );
-
-            const object = new THREE.Mesh( geometry, material );
-
-            object.position.x = Math.random() * 4 - 2;
-            object.position.y = Math.random() * 2;
-            object.position.z = Math.random() * 4 - 2;
-
-            object.rotation.x = Math.random() * 2 * Math.PI;
-            object.rotation.y = Math.random() * 2 * Math.PI;
-            object.rotation.z = Math.random() * 2 * Math.PI;
-
-            object.scale.setScalar( Math.random() + 0.5 );
-
-            object.castShadow = true;
-            object.receiveShadow = true;
-
-            group.add( object );
-
-    }*/
