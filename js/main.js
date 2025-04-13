@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { VRButton } from 'three/addons/webxr/VRButton.js';
 
 import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
-import { getStartButton, capturarInterseccionIniciarJuego } from "./buttons.js"
+import { getStartButton, capturarInterseccionIniciarJuego, generateFlag, animateFlag } from "./buttons.js"
 // CUSTOM IMPORTS
 //import { crearObjetos, empiezaContadores, terminaContadores } from './functions.js';
 
@@ -38,9 +38,6 @@ init();
 animate();
 
 function init() {
-
-    /***********************************************CÓDIGO BASE 1 */
-
     container = document.createElement( 'div' );
     document.body.appendChild( container );
 
@@ -77,15 +74,9 @@ function init() {
     scene.add( group );
     group.add(floor);
     group.add(getStartButton())
-    /***********************************************FIN CÓDIGO BASE 1 */
 
-    
-    //AQUI SE CREABAN LOS OBJETOS. MEJOR CREAR FUNCIONES DONDE CREAR LOS QUE NOS INTERESEN
-    //crearObjetoDePrueba();
+    generateFlag(group);
 
-
-    
-    /***********************************************CÓDIGO BASE 2 */
     renderer = new THREE.WebGLRenderer( { antialias: true } );
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
@@ -235,6 +226,8 @@ function render() {
 
     pintarLinea();
 
+    animateFlag();
+
     renderer.render( scene, camera );
 }
 
@@ -345,7 +338,6 @@ function pintarLinea() {
         }
     }
 }
-
 
 function finalizarDibujoLinea(controller)
 {

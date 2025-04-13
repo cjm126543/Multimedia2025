@@ -50,3 +50,66 @@ export function capturarInterseccionIniciarJuego(intersection, group) {
 function startGame() {
     console.log("iniciar contador");
 }
+
+let flagMesh, poleMesh, shaderMaterial;
+
+export function generateFlag(group) {
+  const poleHeight = 1.5;
+
+  // Palo (pole)
+  const poleGeometry = new THREE.CylinderGeometry(0.02, 0.02, poleHeight, 16);
+  const poleMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
+  poleMesh = new THREE.Mesh(poleGeometry, poleMaterial);
+  poleMesh.position.set(-1, poleHeight / 2, -1); // bien centrado
+  group.add(poleMesh);
+
+  // Bandera (flag)
+  const flagWidth = 0.6;
+  const flagHeight = 0.4;
+
+  const flagGeometry = new THREE.PlaneGeometry(flagWidth, flagHeight, 20, 10);
+
+  shaderMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      time: { value: 0.0 }
+    },
+    vertexShader: `
+      uniform float time;
+      varying vec2 vUv;
+      void main() {
+          vUv = uv;
+          vec3 pos = position;
+  
+          // Movimiento progresivo desde el borde izquierdo (quieto) al derecho (flameo)
+          float wave = sin(pos.y * 10.0 + time * 4.0) * 0.05 * (1.0 - uv.x);
+  
+          pos.x += wave;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec2 vUv;
+      void main() {
+          gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); // rojo sólido
+      }
+    `,
+    side: THREE.DoubleSide
+  });
+
+  flagMesh = new THREE.Mesh(flagGeometry, shaderMaterial);
+
+  flagMesh.position.set(
+      poleMesh.position.x + 0.3,
+      poleMesh.position.y + flagHeight + 0.15,
+      poleMesh.position.z
+  );
+
+  flagMesh.rotation.y = Math.PI;
+  group.add(flagMesh);
+}
+
+export function animateFlag() {
+    if (shaderMaterial) {
+      shaderMaterial.uniforms.time.value += 0.02;
+  }
+}
