@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { tempBalanceTime, balanceTime } from "./main.js";
+import { tempBalanceTime, balanceTime } from "./main_CARLOS.js";
 
 /**
  * Crea un conjunto de cubos apilados que se pueden agarrar, mover y soltar
