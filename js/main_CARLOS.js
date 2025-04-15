@@ -4,8 +4,8 @@ import * as THREE from 'three';
 
 import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 // CUSTOM IMPORTS
-import { getStartButton, capturarInterseccionIniciarJuego, generateFlag, animateFlag } from "./buttons.js"
-import { balanceOn, balanceOff, crearObjetos, empiezaContadores, terminaContadores } from './functions.js';
+import { getStartButton, capturarInterseccionIniciarJuego, generateFlag, animateFlag, totalTime } from "./buttons.js"
+import { balanceOn, balanceOff, crearObjetos, terminaContadores } from './functions.js';
 
 //Variables INICIALES
 let container;
@@ -31,10 +31,11 @@ let drawingPointsLeft = [];
 let drawingPointsRight = [];
 
 // VARIABLES TAREA CARLOS
-var totalTime, balanced, contador;
+var balanced, contador;
 var threshold;
 export var balanceTime;
 export var tempBalanceTime;
+export var gameStarted;
 var FIN;
 
 
@@ -171,11 +172,10 @@ function init() {
 
 
     // CODIGO PARA LOS CONTADORES DE PROGRAMA CARLOS
+    gameStarted = { "status": false };
     balanced = false;
     balanceTime = { "time": 0.0 };
     tempBalanceTime = { "time": 0.0 };
-    let arr = empiezaContadores(controller1);
-    totalTime = arr[0];
     crearObjetos(3, group);
     threshold = 0.5;
     contador = 0;
@@ -211,7 +211,7 @@ function onSelectStart(event) {
         }
 
         capturarInterseccionParaDibujar(controller,intersection);
-        capturarInterseccionIniciarJuego(intersection, group);
+        capturarInterseccionIniciarJuego(intersection, group, controller1);
     }
 }
 
@@ -297,12 +297,14 @@ function render() {
     }
 
     // Permite generar arbitrariamente un tiempo para ver que los contadores funcionan ELIMINAR EN EL PROTO FINAL
-    contador = contador + 1;
-    if (contador >= 3600) {
-        if (!FIN) {
-            console.log("FINNNNN");
-            terminaContadores(controller1, totalTime);
-            FIN = true;
+    if (gameStarted.status) {
+        contador = contador + 1;
+        if (contador >= 3600) {
+            if (!FIN) {
+                console.log("FINNNNN");
+                terminaContadores(controller1, totalTime);
+                FIN = true;
+            }
         }
     }
     // FIN CARLOS -- 14.04
@@ -384,7 +386,7 @@ function pintarLinea() {
 
                 if (drawingPointsLeft.length >= 2) {
                     const curve = new THREE.CatmullRomCurve3(drawingPointsLeft);
-                    const geometry = new THREE.TubeGeometry(curve, 64, 0.09, 8, false);
+                    const geometry = new THREE.TubeGeometry(curve, 64, 0.03, 8, false);
                     const material = new THREE.MeshBasicMaterial({ color: 0x0000ff });
 
                     if (currentLineLeft) scene.remove(currentLineLeft);
@@ -406,7 +408,7 @@ function pintarLinea() {
 
                 if (drawingPointsRight.length >= 2) {
                     const curve = new THREE.CatmullRomCurve3(drawingPointsRight);
-                    const geometry = new THREE.TubeGeometry(curve, 64, 0.09, 8, false);
+                    const geometry = new THREE.TubeGeometry(curve, 64, 0.03, 8, false);
                     const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 
                     if (currentLineRight) scene.remove(currentLineRight);

@@ -2,6 +2,8 @@ import * as THREE from 'three';
 
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
+import { empiezaContadores } from "./functions.js";
+import { gameStarted } from "./main_CARLOS.js";
 
 export function getStartButton() {
     const botonGroup = new THREE.Group();
@@ -36,20 +38,26 @@ export function getStartButton() {
     return botonGroup
 }
 
-export function capturarInterseccionIniciarJuego(intersection, group) {
+export function capturarInterseccionIniciarJuego(intersection, group, controller) {
     const objeto = intersection.object;
     const boton = objeto.parent;
   
     if (boton.name === "botonStart") {
       console.log("startGame");
-      startGame();
+      startGame(controller);
       group.remove(boton);
     }
   }
-  
-function startGame() {
-    console.log("iniciar contador");
+
+// MODIFICACIONES CARLOS
+export var totalTime;
+function startGame(controller) {
+  console.log("iniciar contador");
+  let arr = empiezaContadores(controller);
+  totalTime = arr[0];
+  gameStarted.status = true;
 }
+// FIN CARLOS
 
 let flagMesh, poleMesh, shaderMaterial;
 
