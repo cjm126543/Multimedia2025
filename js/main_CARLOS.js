@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { VRButton } from 'three/addons/webxr/VRButton.js';
+//import { VRButton } from 'three/addons/webxr/VRButton.js';
 
 import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 // CUSTOM IMPORTS
@@ -51,11 +51,13 @@ function init() {
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 10 );
     camera.position.set( 0, 1.6, 3 );
 
-    const floorGeometry = new THREE.PlaneGeometry( 4, 4 );
+    const floorGeometry = new THREE.PlaneGeometry( 10, 10 );
     const floorMaterial = new THREE.MeshStandardMaterial( {
             color: 0xeff312,
             roughness: 1.0,
-            metalness: 0.0
+            metalness: 0.0,
+            transparent: true,
+            opacity: 0
     } );
     floor = new THREE.Mesh( floorGeometry, floorMaterial );
     floor.rotation.x = - Math.PI / 2;
@@ -81,7 +83,8 @@ function init() {
 
     generateFlag(group);
 
-    renderer = new THREE.WebGLRenderer( { antialias: true } );
+    renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
+    renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.outputEncoding = THREE.sRGBEncoding;
@@ -89,7 +92,31 @@ function init() {
     renderer.xr.enabled = true;
     container.appendChild( renderer.domElement );
 
-    document.body.appendChild( VRButton.createButton( renderer ) );
+    //document.body.appendChild( VRButton.createButton( renderer ) );
+    const arButton = document.createElement('button');
+    arButton.textContent = 'ENTRAR EN MR';
+    arButton.style.position = 'absolute';
+    arButton.style.bottom = '20px';
+    arButton.style.left = '20px';
+    arButton.style.padding = '10px';
+    arButton.style.background = '#222';
+    arButton.style.color = '#fff';
+    arButton.style.border = '1px solid #fff';
+    document.body.appendChild(arButton);
+
+    arButton.addEventListener('click', async () => {
+        if (navigator.xr) {
+            const session = await navigator.xr.requestSession('immersive-ar', {
+                requiredFeatures: ['hit-test', 'local-floor'],
+                optionalFeatures: ['dom-overlay'],
+                domOverlay: { root: document.body }
+            });
+            renderer.xr.setSession(session);
+        } else {
+            alert('WebXR AR no está disponible en este dispositivo o navegador.');
+        }
+    });
+    scene.background = null;
 
     // controllers
 
@@ -130,24 +157,25 @@ function init() {
     /***********************************************FIN CÓDIGO BASE 2 */
 
     // Crear geometría del pozo (cilindro hueco)
-    const abyssGeometry = new THREE.CylinderGeometry(1.5, 1.5, 5, 64, 1, true); // radio, altura, segmentos
-    const abyssMaterial = new THREE.MeshStandardMaterial({
-        color: 0x111111,
-        roughness: 1,
-        metalness: 0,
-        side: THREE.BackSide // ¡esto hace que se vea desde dentro!
-    });
-
-    const abyss = new THREE.Mesh(abyssGeometry, abyssMaterial);
-    abyss.position.set(0, -2.5, 0); // la mitad de la altura negativa
-    group.add(abyss);
+    //const abyssGeometry = new THREE.CylinderGeometry(1.5, 1.5, 5, 64, 1, true); // radio, altura, segmentos
+    //const abyssMaterial = new THREE.MeshStandardMaterial({
+    //    color: 0x111111,
+    //    roughness: 1,
+    //    metalness: 0,
+    //    side: THREE.BackSide // ¡esto hace que se vea desde dentro!
+    //});
+//
+    //const abyss = new THREE.Mesh(abyssGeometry, abyssMaterial);
+    //abyss.position.set(0, -2.5, 0); // la mitad de la altura negativa
+    //group.add(abyss);
 
 
     // CODIGO PARA LOS CONTADORES DE PROGRAMA CARLOS
     balanced = false;
+    balanceTime = { "time": 0.0 };
+    tempBalanceTime = { "time": 0.0 };
     let arr = empiezaContadores(controller1);
     totalTime = arr[0];
-    tempBalanceTime = { "time": 0.0 };
     crearObjetos(3, group);
     threshold = 0.5;
     contador = 0;
