@@ -27,6 +27,9 @@ export function crearObjetos(numObjetos, group) {
     customObject.position.x = -0.5;
     customObject.position.y = accumulator;
     customObject.position.z = 1;
+    customObject.velocidad = 1;
+    customObject.direccionVertical = false;
+    customObject.name = "cuadradoNormal";
 
     // Stack objects vertically
     accumulator += height;

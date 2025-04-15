@@ -69,6 +69,7 @@ export function generateFlag(group) {
   const poleMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
   poleMesh = new THREE.Mesh(poleGeometry, poleMaterial);
   poleMesh.position.set(-1, poleHeight / 2, -1); // bien centrado
+  poleMesh.name = "PoleMesh";
   group.add(poleMesh);
 
   // Bandera (flag)
@@ -113,6 +114,7 @@ export function generateFlag(group) {
   );
 
   flagMesh.rotation.y = Math.PI;
+  flagMesh.name = "FlagMesh";
   group.add(flagMesh);
 }
 

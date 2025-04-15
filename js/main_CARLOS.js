@@ -21,6 +21,8 @@ const tempMatrix = new THREE.Matrix4();
 
 let group;
 
+let numObjetos = 3;
+
 //VARIABLES TAREA ALEX
 let unicoObjetoAInterseccionar = null;
 let isDrawingLeft = false;
@@ -176,11 +178,18 @@ function init() {
     balanced = false;
     balanceTime = { "time": 0.0 };
     tempBalanceTime = { "time": 0.0 };
-    crearObjetos(3, group);
+    crearObjetos(numObjetos, group);
     threshold = 0.10;
     contador = 0;
     FIN = false;
 
+    console.log("numObjetos: ",group.children.length );
+    for(let i = 0; i < group.children.length; i++){
+        let aMovingObject = group.children[i];
+         //falta por rellenar.
+        aMovingObject.velocidad = 0.01;
+        aMovingObject.direccionVertical = false;
+    }
 }
 
 function onWindowResize() {
@@ -284,6 +293,8 @@ function render() {
     pintarLinea();
 
     animateFlag();
+
+    actualizarPosicion();
 
     // CARLOS anhadir comprobacion para temporizar tiempo de equilibrio -- 14.04
     if (Math.abs(controller1.position.y - controller2.position.y) < threshold) {
@@ -431,6 +442,50 @@ function finalizarDibujoLinea(controller)
         isDrawingRight = false;
         currentLineRight = null;
     }
+}
+
+function actualizarPosicion(){
+    console.log("Entra a actualiza posicion");
+    let alturaCaja = 0.25;
+    let anchuraCaja = 0.25;
+    let alturaMovimiento = 1.5;
+    let anchuraMovimiento = 1.5;
+    console.log("NumeroObjetos: ", group.children.length);
+    for(let i = 0; i < group.children.length; i++){
+        let aMovingObject = group.children[i];
+        console.log("Posicion: ", aMovingObject.position.x);
+        if(!estaIntersectado(aMovingObject)){
+            if(aMovingObject.direccionVertical && aMovingObject.name == "cuadradoNormal"){
+                console.log("Se mueve en vertical");
+                aMovingObject.position.y += aMovingObject.velocidad;
+                if(aMovingObject.position.y + (alturaCaja/2) > alturaMovimiento/2 || aMovingObject.position.y - (alturaCaja/2) < -alturaMovimiento/2){
+                    aMovingObject.velocidad = aMovingObject.velocidad * (-1);
+                }
+            }
+            else if (aMovingObject.name == "cuadradoNormal"){
+    
+                console.log("Se mueve en horizontal");
+                aMovingObject.position.x += aMovingObject.velocidad;
+                console.log("Posición: ", aMovingObject.position.x);
+                if(aMovingObject.position.x + (anchuraCaja/2) > anchuraMovimiento/2 || aMovingObject.position.x - (anchuraCaja/2) < -anchuraMovimiento/2){
+                    console.log("Entra a cambiar de sentido");
+                    aMovingObject.velocidad = aMovingObject.velocidad * (-1);
+                }
+            }
+        }
+    }
+}
+
+function estaIntersectado(obj1){
+    let resultado = false;
+    for(let i  = 0; i < intersected.length; i++){
+        let obj = intersected[i];
+        if(obj === obj1){
+            resultado = true;
+            break;
+        }
+    }
+    return resultado;
 }
 
 /****************************** FUNCIONES CARLOS */
