@@ -57,7 +57,7 @@ export function terminaContadores(controller, startExecTime) {
   let executionTime = (Date.now() - startExecTime) / 1000;
   controller.removeEventListener("onBalance", balanceOn);
   controller.removeEventListener("offBalance", balanceOff);
-  let finalBalanceTime = getBalanceTime() / 1000;
+  let finalBalanceTime = (getBalanceTime() / 1000) / 1000;
 
   // Genera fichero con tiempos
   const blob = new Blob(["Tiempo total: ", executionTime.toString(), "s\n",

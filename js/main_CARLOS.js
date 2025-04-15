@@ -177,7 +177,7 @@ function init() {
     balanceTime = { "time": 0.0 };
     tempBalanceTime = { "time": 0.0 };
     crearObjetos(3, group);
-    threshold = 0.5;
+    threshold = 0.10;
     contador = 0;
     FIN = false;
 
@@ -288,10 +288,12 @@ function render() {
     // CARLOS anhadir comprobacion para temporizar tiempo de equilibrio -- 14.04
     if (Math.abs(controller1.position.y - controller2.position.y) < threshold) {
         if (!balanced) {
+            console.log("ESTOY EN EQUILIBRIO");
             balanceOn();
             balanced = true;
         }
     } else {
+        console.log("SALGO DE EQUILIBRIO");
         balanceOff();
         balanced = false;
     }
