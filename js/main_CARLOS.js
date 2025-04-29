@@ -468,7 +468,7 @@ function actualizarPosicion(){
                 //console.log("Se mueve en horizontal");
                 aMovingObject.position.x += aMovingObject.velocidad;
                 //console.log("Posición: ", aMovingObject.position.x);
-                if(aMovingObject.position.x >= aMovingObject.puntoFijo + 1.5 || aMovingObject.position.x <= aMovingObject.puntoFijo - 1.5){
+                if(aMovingObject.position.x >= aMovingObject.puntoFijo + 1.0 || aMovingObject.position.x <= aMovingObject.puntoFijo - 1.0){
                     //console.log("Entra a cambiar de sentido");
                     aMovingObject.velocidad = aMovingObject.velocidad * (-1);
                 }
