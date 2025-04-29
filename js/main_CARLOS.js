@@ -286,13 +286,16 @@ function animate() {
 }
 
 function render() {
-    cleanIntersected();
 
-    intersectObjects(controller1);
-    intersectObjects(controller2);
+    if (!gameStarted.status) {
+        cleanIntersected();
 
-    pintarLinea();
-
+        intersectObjects(controller1);
+        intersectObjects(controller2);
+    
+        pintarLinea();    
+    }
+    
     animateFlag();
 
     actualizarPosicion();
@@ -456,21 +459,23 @@ function actualizarPosicion(){
         let aMovingObject = group.children[i];
         //console.log("Posicion: ", aMovingObject.position.x);
         if(!estaIntersectado(aMovingObject)){
-            //if(aMovingObject.direccionVertical && aMovingObject.name == "cuadradoNormal"){
-            //    //console.log("Se mueve en vertical");
-            //    aMovingObject.position.y += aMovingObject.velocidad;
-            //    if(aMovingObject.position.y + (alturaCaja/2) > alturaMovimiento/2 || aMovingObject.position.y - (alturaCaja/2) < -alturaMovimiento/2){
-            //        aMovingObject.velocidad = aMovingObject.velocidad * (-1);
-            //    }
-            //}
-            if (aMovingObject.name == "cuadradoNormal"){
-    
-                //console.log("Se mueve en horizontal");
-                aMovingObject.position.x += aMovingObject.velocidad;
-                //console.log("Posición: ", aMovingObject.position.x);
-                if(aMovingObject.position.x >= aMovingObject.puntoFijo + 1.0 || aMovingObject.position.x <= aMovingObject.puntoFijo - 1.0){
-                    //console.log("Entra a cambiar de sentido");
-                    aMovingObject.velocidad = aMovingObject.velocidad * (-1);
+            if (gameStarted.status) {
+                //if(aMovingObject.direccionVertical && aMovingObject.name == "cuadradoNormal"){
+                //    //console.log("Se mueve en vertical");
+                //    aMovingObject.position.y += aMovingObject.velocidad;
+                //    if(aMovingObject.position.y + (alturaCaja/2) > alturaMovimiento/2 || aMovingObject.position.y - (alturaCaja/2) < -alturaMovimiento/2){
+                //        aMovingObject.velocidad = aMovingObject.velocidad * (-1);
+                //    }
+                //}
+                if (aMovingObject.name == "cuadradoNormal"){
+        
+                    //console.log("Se mueve en horizontal");
+                    aMovingObject.position.x += aMovingObject.velocidad;
+                    //console.log("Posición: ", aMovingObject.position.x);
+                    if(aMovingObject.position.x >= aMovingObject.puntoFijo + 1.0 || aMovingObject.position.x <= aMovingObject.puntoFijo - 1.0){
+                        //console.log("Entra a cambiar de sentido");
+                        aMovingObject.velocidad = aMovingObject.velocidad * (-1);
+                    }
                 }
             }
         }
