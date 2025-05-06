@@ -4,7 +4,7 @@ import * as THREE from 'three';
 
 import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 // CUSTOM IMPORTS
-import { getStartButton, capturarInterseccionIniciarJuego, generateFlag, animateFlag, totalTime } from "./buttons.js"
+import { getStartButton, capturarInterseccionIniciarJuego, generateFlag, animateFlag, totalTime, startAudio } from "./buttons.js"
 import { balanceOn, balanceOff, crearObjetos, terminaContadores } from './functions.js';
 
 //Variables INICIALES
@@ -120,6 +120,8 @@ function init() {
         }
     });
     scene.background = null;
+
+    startAudio(camera);
 
     // controllers
 
