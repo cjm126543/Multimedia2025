@@ -21,7 +21,7 @@ const tempMatrix = new THREE.Matrix4();
 
 let group;
 
-let numObjetos = 3;
+let numObjetos = 7;
 
 //VARIABLES TAREA ALEX
 let unicoObjetoAInterseccionar = null;
@@ -38,6 +38,7 @@ var threshold;
 export var balanceTime;
 export var tempBalanceTime;
 export var gameStarted;
+export var diccionarioPos;
 var FIN;
 
 
@@ -45,6 +46,24 @@ init();
 animate();
 
 function init() {
+    diccionarioPos = {};
+
+    /******************************************MANDO */
+    let geometry_esfera = new THREE.SphereGeometry(0.1, 32, 32); // radio ajustable
+    let materialLeft_esfera = new THREE.MeshBasicMaterial({ color: 0x0000ff, transparent: true, opacity: 0.5 }); // Azul translúcido
+    let materialRight_esfera = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.5 }); // Rojo translúcido
+
+    const sphereLeft = new THREE.Mesh(geometry_esfera, materialLeft_esfera);
+    sphereLeft.name = 'sphereLeft';
+    
+
+    const sphereRight = new THREE.Mesh(geometry_esfera, materialRight_esfera);
+    sphereRight.name = 'sphereRight';
+    
+
+
+
+
     container = document.createElement( 'div' );
     document.body.appendChild( container );
 
@@ -54,7 +73,7 @@ function init() {
     camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 10 );
     camera.position.set( 0, 1.6, 3 );
 
-    const floorGeometry = new THREE.PlaneGeometry( 10, 10 );
+    const floorGeometry = new THREE.PlaneGeometry( 30, 30 );
     const floorMaterial = new THREE.MeshStandardMaterial( {
             color: 0xeff312,
             roughness: 1.0,
@@ -144,12 +163,16 @@ function init() {
     controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
     scene.add( controllerGrip2 );
 
+    /**********************************************NUEVO */
+    controllerGrip1.add(sphereLeft); // mando izquierdo
+    controllerGrip2.add(sphereRight); // mando derecho
+
     const geometry = new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, - 1 ) ] );
 
     const line = new THREE.Line( geometry );
     line.computeLineDistances(); // ← esto es obligatorio
     line.name = 'line';
-    line.scale.z = 5;
+    line.scale.z = 10;
 
     controller1.add( line.clone() );
     controller2.add( line.clone() );
@@ -317,6 +340,16 @@ function render() {
             balanceOff();
             balanced = false;
         }
+
+        // Genera entrada del diccionario
+        let entrada = {
+            "ID": contador, "mandos": [
+                {"mando": "I", "pos": [controller1.position.x, controller1.position.y, controller1.position.z], "equilibrio": balanced},
+                {"mando": "D", "pos": [controller2.position.x, controller2.position.y, controller2.position.z], "equilibrio": balanced}
+            ]
+        };
+        diccionarioPos[entrada.ID] = entrada;
+
         if (contador >= 3600) {
             if (!FIN) {
                 console.log("FINNNNN");
