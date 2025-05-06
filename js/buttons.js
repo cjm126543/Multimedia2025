@@ -123,3 +123,18 @@ export function animateFlag() {
       shaderMaterial.uniforms.time.value += 0.02;
   }
 }
+
+export function startAudio(camera) {
+  const listener = new THREE.AudioListener();
+  camera.add(listener);
+
+  const sound = new THREE.Audio(listener);
+
+  const audioLoader = new THREE.AudioLoader();
+  audioLoader.load('audio/zombies.mp3', function(buffer) {
+      sound.setBuffer(buffer);
+      sound.setLoop(true);
+      sound.setVolume(0.5);  // Puedes ajustar el volumen
+      sound.play();          // ¡Reproduce la música!
+  });
+}
