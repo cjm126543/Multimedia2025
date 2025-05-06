@@ -134,13 +134,12 @@ function init() {
                 domOverlay: { root: document.body }
             });
             renderer.xr.setSession(session);
+            startAudio(camera);
         } else {
             alert('WebXR AR no está disponible en este dispositivo o navegador.');
         }
     });
     scene.background = null;
-
-    startAudio(camera);
 
     // controllers
 
