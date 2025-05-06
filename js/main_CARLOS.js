@@ -38,6 +38,7 @@ var threshold;
 export var balanceTime;
 export var tempBalanceTime;
 export var gameStarted;
+export var diccionarioPos;
 var FIN;
 
 
@@ -45,6 +46,8 @@ init();
 animate();
 
 function init() {
+    diccionarioPos = {};
+
     /******************************************MANDO */
     let geometry_esfera = new THREE.SphereGeometry(0.1, 32, 32); // radio ajustable
     let materialLeft_esfera = new THREE.MeshBasicMaterial({ color: 0x0000ff, transparent: true, opacity: 0.5 }); // Azul translúcido
@@ -338,6 +341,16 @@ function render() {
             balanceOff();
             balanced = false;
         }
+
+        // Genera entrada del diccionario
+        let entrada = {
+            "ID": contador, "mandos": [
+                {"mando": "I", "pos": [controller1.position.x, controller1.position.y, controller1.position.z], "equilibrio": balanced},
+                {"mando": "D", "pos": [controller2.position.x, controller2.position.y, controller2.position.z], "equilibrio": balanced}
+            ]
+        };
+        diccionarioPos[entrada.ID] = entrada;
+
         if (contador >= 3600) {
             if (!FIN) {
                 console.log("FINNNNN");

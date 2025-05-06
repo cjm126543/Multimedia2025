@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { tempBalanceTime, balanceTime } from "./main_CARLOS.js";
+import { tempBalanceTime, balanceTime, diccionarioPos } from "./main_CARLOS.js";
 
 /**
  * Crea un conjunto de cubos apilados que se pueden agarrar, mover y soltar
@@ -65,7 +65,9 @@ export function terminaContadores(controller, startExecTime) {
 
   // Genera fichero con tiempos
   const blob = new Blob(["Tiempo total: ", executionTime.toString(), "s\n",
-                          "Tiempo de equilibrio: ", finalBalanceTime.toString(), "s\n"],
+                          "Tiempo de equilibrio: ", finalBalanceTime.toString(), "s\n",
+                        "------------------------------------------------------------\n",
+                        diccionarioPos.toString()],
                         {type: 'text/plain'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
