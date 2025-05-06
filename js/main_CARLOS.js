@@ -178,8 +178,8 @@ function init() {
     // CODIGO PARA LOS CONTADORES DE PROGRAMA CARLOS
     gameStarted = { "status": false };
     balanced = false;
-    balanceTime = { "time": 0.0 };
-    tempBalanceTime = { "time": 0.0 };
+    balanceTime = { "time": Date.now() };
+    tempBalanceTime = { "time": Date.now() };
     crearObjetos(numObjetos, group);
     threshold = 0.10;
     contador = 0;
@@ -234,6 +234,7 @@ function onSelectEnd( event ) {
         const object = controller.userData.selected;
         //object.material = object.initialMaterial;
         group.attach( object );
+        object.puntoFijo = object.position.x;
         controller.userData.selected = undefined;
     }
     finalizarDibujoLinea(controller);
@@ -287,33 +288,36 @@ function animate() {
 }
 
 function render() {
-    cleanIntersected();
 
-    intersectObjects(controller1);
-    intersectObjects(controller2);
+    if (!gameStarted.status) {
+        cleanIntersected();
 
-    pintarLinea();
-
+        intersectObjects(controller1);
+        intersectObjects(controller2);
+    
+        pintarLinea();    
+    }
+    
     animateFlag();
 
     actualizarPosicion();
 
-    // CARLOS anhadir comprobacion para temporizar tiempo de equilibrio -- 14.04
-    if (Math.abs(controller1.position.y - controller2.position.y) < threshold) {
-        if (!balanced) {
-            console.log("ESTOY EN EQUILIBRIO");
-            balanceOn();
-            balanced = true;
-        }
-    } else {
-        console.log("SALGO DE EQUILIBRIO");
-        balanceOff();
-        balanced = false;
-    }
-
+    
     // Permite generar arbitrariamente un tiempo para ver que los contadores funcionan ELIMINAR EN EL PROTO FINAL
     if (gameStarted.status) {
         contador = contador + 1;
+        // CARLOS anhadir comprobacion para temporizar tiempo de equilibrio -- 14.04
+        if (Math.abs(controller1.position.y - controller2.position.y) < threshold) {
+            if (!balanced) {
+                console.log("ESTOY EN EQUILIBRIO");
+                balanceOn();
+                balanced = true;
+            }
+        } else {
+            console.log("SALGO DE EQUILIBRIO");
+            balanceOff();
+            balanced = false;
+        }
         if (contador >= 3600) {
             if (!FIN) {
                 console.log("FINNNNN");
@@ -447,31 +451,33 @@ function finalizarDibujoLinea(controller)
 }
 
 function actualizarPosicion(){
-    console.log("Entra a actualiza posicion");
+    //console.log("Entra a actualiza posicion");
     let alturaCaja = 0.25;
     let anchuraCaja = 0.25;
     let alturaMovimiento = 1.5;
     let anchuraMovimiento = 1.5;
-    console.log("NumeroObjetos: ", group.children.length);
+    //console.log("NumeroObjetos: ", group.children.length);
     for(let i = 0; i < group.children.length; i++){
         let aMovingObject = group.children[i];
-        console.log("Posicion: ", aMovingObject.position.x);
+        //console.log("Posicion: ", aMovingObject.position.x);
         if(!estaIntersectado(aMovingObject)){
-            if(aMovingObject.direccionVertical && aMovingObject.name == "cuadradoNormal"){
-                console.log("Se mueve en vertical");
-                aMovingObject.position.y += aMovingObject.velocidad;
-                if(aMovingObject.position.y + (alturaCaja/2) > alturaMovimiento/2 || aMovingObject.position.y - (alturaCaja/2) < -alturaMovimiento/2){
-                    aMovingObject.velocidad = aMovingObject.velocidad * (-1);
-                }
-            }
-            else if (aMovingObject.name == "cuadradoNormal"){
-    
-                console.log("Se mueve en horizontal");
-                aMovingObject.position.x += aMovingObject.velocidad;
-                console.log("Posición: ", aMovingObject.position.x);
-                if(aMovingObject.position.x + (anchuraCaja/2) > anchuraMovimiento/2 || aMovingObject.position.x - (anchuraCaja/2) < -anchuraMovimiento/2){
-                    console.log("Entra a cambiar de sentido");
-                    aMovingObject.velocidad = aMovingObject.velocidad * (-1);
+            if (gameStarted.status) {
+                //if(aMovingObject.direccionVertical && aMovingObject.name == "cuadradoNormal"){
+                //    //console.log("Se mueve en vertical");
+                //    aMovingObject.position.y += aMovingObject.velocidad;
+                //    if(aMovingObject.position.y + (alturaCaja/2) > alturaMovimiento/2 || aMovingObject.position.y - (alturaCaja/2) < -alturaMovimiento/2){
+                //        aMovingObject.velocidad = aMovingObject.velocidad * (-1);
+                //    }
+                //}
+                if (aMovingObject.name == "cuadradoNormal"){
+        
+                    //console.log("Se mueve en horizontal");
+                    aMovingObject.position.x += aMovingObject.velocidad;
+                    //console.log("Posición: ", aMovingObject.position.x);
+                    if(aMovingObject.position.x >= aMovingObject.puntoFijo + 1.0 || aMovingObject.position.x <= aMovingObject.puntoFijo - 1.0){
+                        //console.log("Entra a cambiar de sentido");
+                        aMovingObject.velocidad = aMovingObject.velocidad * (-1);
+                    }
                 }
             }
         }
