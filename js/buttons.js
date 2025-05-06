@@ -131,6 +131,7 @@ export function startAudio(camera) {
   const sound = new THREE.Audio(listener);
 
   const audioLoader = new THREE.AudioLoader();
+  console.log("start audio")
   audioLoader.load('audio/zombies.mp3', function(buffer) {
       sound.setBuffer(buffer);
       sound.setLoop(true);
