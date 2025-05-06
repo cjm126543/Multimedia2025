@@ -67,7 +67,7 @@ export function terminaContadores(controller, startExecTime) {
   const blob = new Blob(["Tiempo total: ", executionTime.toString(), "s\n",
                           "Tiempo de equilibrio: ", finalBalanceTime.toString(), "s\n",
                         "------------------------------------------------------------\n",
-                        diccionarioPos.toString()],
+                        JSON.stringify(diccionarioPos, null, 2)],
                         {type: 'text/plain'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
